@@ -1,0 +1,25 @@
+{
+  "name": "react-native-amap",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liuhong1happy/react-native-amap.git"
+  },
+  "keywords": [
+    "react",
+    "react-component",
+    "react-native",
+    "react-native-amap"
+  ],
+  "author": "Holly Liu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/liuhong1happy/react-native-amap/issues"
+  },
+  "homepage": "https://github.com/liuhong1happy/react-native-amap#readme"
+}
