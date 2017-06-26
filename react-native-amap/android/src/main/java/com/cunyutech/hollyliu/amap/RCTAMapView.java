@@ -1,12 +1,9 @@
 package com.cunyutech.hollyliu.amap;
 
 import android.app.Activity;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.util.Log;
@@ -78,7 +75,6 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
         mSensor = mSM.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         mSM.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);//注册回调函数
     }
-
 
     // 设定CameraUpdate
     public void setAnimateCamera(CameraUpdate cameraUpdate) {
@@ -157,8 +153,8 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
         WritableMap location = Arguments.createMap();
         Location location1 = aMap.getMyLocation();
         if(location1!=null) {
-            target.putDouble("latitude", location1.getLatitude());
-            target.putDouble("longitude", location1.getLongitude());
+            location.putDouble("latitude", location1.getLatitude());
+            location.putDouble("longitude", location1.getLongitude());
         }
 
         WritableMap event = Arguments.createMap();
@@ -208,7 +204,7 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
     public String addMarker(MarkerOptions options) {
         if(aMap!=null) {
             Marker marker = aMap.addMarker(options);
-            String id = polyline.getId();
+            String id = marker.getId();
             // 加入哈希列表
             markHashMap.put(id, marker);
             return id;
@@ -219,7 +215,8 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
     public String setMarkerOptions(String pId, MarkerOptions options) {
         Marker marker = markHashMap.get(pId);
         if(aMap!=null && marker!=null) {
-            marker.setMarkerOptions(options);
+            if(!marker.getOptions().equals(options))
+                marker.setMarkerOptions(options);
             return marker.getId();
         }
         return "";
@@ -243,7 +240,13 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION) {
             float degree = sensorEvent.values[0];
             float bearing = aMap.getCameraPosition().bearing;
-            aMap.setMyLocationRotateAngle((-degree + bearing + 360) % 360);
+            float rotate = (-degree + bearing + 360) % 360;
+            aMap.setMyLocationRotateAngle(rotate);
+            // 暴露定位信息
+            WritableMap event = Arguments.createMap();
+            event.putDouble("rotate", rotate);
+            ReactContext reactContext = (ReactContext)getContext();
+            reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "rotateChange", event);
         }
     }
 
