@@ -1,9 +1,11 @@
 // AMapView.js
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { requireNativeComponent, View, processColor } from 'react-native';
+import { requireNativeComponent, View, processColor, ViewPropTypes, Alert, Image } from 'react-native';
 
 var MyLocationStyle = (style = {})=> {
+  if(style.fillColor) options.fillColor = processColor(options.fillColor);
+  if(style.strokeColor) options.strokeColor = processColor(options.strokeColor);
   return {
       type: 4, // LOCATION_TYPE_LOCATION_ROTATE
       strokeWidth: 2,
@@ -19,6 +21,32 @@ var MyLocationStyle = (style = {})=> {
     };
 }
 
+var MarkerOptions = (options = {})=> {
+  if(options.icon) options.icon = Image.resolveAssetSource(options.icon);
+  return {
+    flat: true,
+    draggable: true,
+    visible: true,
+    position: {
+      latitude: 0,
+      longitude: 0,
+    },
+    title: "标记",
+    snippet: "标记",
+    ...options
+  }
+}
+
+var PolylineOptions = (options = {})=> {
+  if(options.color) options.color = processColor(options.color);
+  return {
+    width: 1,
+    color: processColor('rgba(0,0,255,0.6)'),
+    points: [{latitude: 0,longitude: 0}, {latitude: 100,longitude: 100}],
+    ...options
+  }
+}
+
 MyLocationStyle.LOCATION_TYPE_SHOW = 0;
 MyLocationStyle.LOCATION_TYPE_LOCATE = 1;
 MyLocationStyle.LOCATION_TYPE_FOLLOW = 2;
@@ -28,9 +56,30 @@ MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER = 5;
 MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER = 6;
 MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER = 7;
 
-var iface = {
-  name: 'AMapView',
-  propTypes: {
+class AMapView extends Component {
+  constructor(props, context) {
+    super(props, context);
+    this.loaded = false;
+    this.state = {
+      mapProps: {}
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    if(this.loaded) {
+      this.setState({mapProps: {...nextProps}})
+    }
+  }
+  onLayout(e) {
+    if(!this.loaded) this.setState({mapProps: {...this.props}});
+    this.loaded = true;
+    this.props.onLayout && this.props.onLayout(e);
+  }
+  render() {
+    return (<RCTAMapView {...this.state.mapProps} onLayout={(e)=>this.onLayout(e)} />)
+  }
+}
+
+AMapView.propTypes = {
     myLocationEnabled: PropTypes.bool,
     myLocationStyle: PropTypes.shape({
       type: PropTypes.number,
@@ -51,9 +100,13 @@ var iface = {
     showScaleControls: PropTypes.bool,
     polylines: PropTypes.array,
     markers: PropTypes.array,
-    ...View.propTypes // 包含默认的View的属性
-  },
-  defaultProps: {
+    onMyLocationChange: PropTypes.func,
+    onCameraChange: PropTypes.func,
+    onRotateChange: PropTypes.func,
+    ...ViewPropTypes // 包含默认的View的属性
+}
+
+AMapView.defaultProps = {
     myLocationEnabled: false,
     myLocationStyle: new MyLocationStyle(),
     showMyLocationButton: false,
@@ -62,34 +115,17 @@ var iface = {
     showScaleControls: false,
     mapType: 1,
     markers: [],
-    polylines: []
-  }
-};
-
-
-var RCTAMapView = requireNativeComponent('RCTAMapView', iface);
-
-class AMapView extends Component {
-  constructor(props, context) {
-    super(props, context);
-    this.loaded = false;
-    this.state = {
-      mapProps: {}
-    }
-  }
-  componentWillReceiveProps(nextProps) {
-    if(this.state.loaded) {
-      this.setState({mapProps: nextProps})
-    }
-  }
-  onLayout(e) {
-    if(!this.loaded) this.setState({mapProps: this.props});
-    this.loaded = true;
-  }
-  render() {
-    return (<RCTAMapView {...this.state.mapProps} onLayout={(e)=>this.onLayout(e)}/>)
-  }
+    polylines: [],
+    onMyLocationChange: ()=> {},
+    onCameraChange: ()=> {},
+    onRotateChange: ()=> {}
 }
+
+var RCTAMapView = requireNativeComponent(`RCTAMapView`, AMapView, {
+  nativeOnly: {onChange: true}
+});
 
 module.exports = AMapView;
 module.exports.MyLocationStyle = MyLocationStyle;
+module.exports.MarkerOptions = MarkerOptions;
+module.exports.PolylineOptions = PolylineOptions;

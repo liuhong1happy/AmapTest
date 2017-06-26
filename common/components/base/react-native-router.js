@@ -150,9 +150,6 @@ export class Router extends React.Component {
     }
     // Alert.alert("提示", "挂载navigator", [{ text: "确定", onPress: () => {} }]);
   }
-  componentWillUnmout() {
-    window.removeEventListener("hashchange", this._handleHashChange);
-  }
   _matchLocation(_location, hash) {
     const locations = _location.split("/");
     const hashs = hash.split("/");
