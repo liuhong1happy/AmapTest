@@ -96,7 +96,6 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
     }
     @Override
     public void onMyLocationChange(Location location) {
-
         WritableMap event = Arguments.createMap();
         event.putDouble("latitude", location.getLatitude());
         event.putDouble("longitude", location.getLongitude());
@@ -111,8 +110,6 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "myLocationChange", event);
 
         Log.println(Log.INFO, "location", location.toString());
-
-
     }
     // 开启显示室内地图
     public void setShowIndoorMapEnabled(boolean flag) {
@@ -214,10 +211,17 @@ public class RCTAMapView extends MapView implements AMap.OnMyLocationChangeListe
     // 更新标志
     public String setMarkerOptions(String pId, MarkerOptions options) {
         Marker marker = markHashMap.get(pId);
-        if(aMap!=null && marker!=null) {
-            if(!marker.getOptions().equals(options))
-                marker.setMarkerOptions(options);
-            return marker.getId();
+        if(aMap!=null) {
+            if(marker!=null) {
+                if (!marker.getOptions().equals(options))
+                    marker.setMarkerOptions(options);
+                return marker.getId();
+            } else {
+                Marker newMarker = aMap.addMarker(options);
+                String id = newMarker.getId();
+                markHashMap.put(id, newMarker);
+                return newMarker.getId();
+            }
         }
         return "";
     }

@@ -6,9 +6,8 @@ import {
     StyleSheet,
     StatusBar
 } from 'react-native';
-import Dimensions from '../../utils/Dimensions';
-import { TouchableOpacity } from './react-native-form';
-import Platform from './react-native-platform';
+import Dimensions from './react-native-dimensions';
+import { TouchableOpacity, Platform } from './react-native-components';
 
 const { width } = Dimensions.get('window');
 // navIcon,logo,title,titleColor,subtitle,subtitleColor,actions
@@ -30,7 +29,7 @@ class ActionButton extends React.Component {
     const img = this.genImage();
     return (<TouchableOpacity onPress={this.onPress.bind(this)} style={[styles.button, { width:this.props.width, marginLeft:this.props.marginLeft }]}>
       {img}
-      <Text style={{ color: this.props.titleColor || "#1c2429", fontSize:Dimensions.getSize(6) }}>{this.props.title}</Text>
+      <Text style={{ color: this.props.titleColor || "#1c2429", fontSize: 18 }}>{this.props.title}</Text>
     </TouchableOpacity>);
   }
 }
@@ -102,17 +101,17 @@ class ToolBar extends React.Component {
     const logo = this.props.logo || {};
     return (<View style={[styles.toolbar]}>
       <StatusBar hidden={false} barStyle={Platform.isIOS  ? "dark-content" : "light-content"} />
-      <View style={[styles.item, styles.actions, { justifyContent:"flex-start", marginLeft:Dimensions.getSize(4) }]}>
+      <View style={[styles.item, styles.actions, { justifyContent:"flex-start", marginLeft:12 }]}>
         <ActionButton icon={navIcon.icon} title={navIcon.title} name={navIcon.name} width={navIcon.width} onPress={(e, name)=>this.onNavIconPress(e, name)} />
         <ActionButton icon={logo.icon} title={logo.title} name={logo.name} width={navIcon.width} onPress={(e, name)=>this.onLogoPress(e, name)} />
       </View>
       <View style={[styles.item, styles.titles]}>
         { title }
       </View>
-      <View style={[styles.item, styles.actions, { justifyContent:"flex-end", marginRight:Dimensions.getSize(4) }]}>
+      <View style={[styles.item, styles.actions, { justifyContent:"flex-end", marginRight:12 }]}>
         {
             actions.map((action, pos) => React.createElement(ActionButton, 
-            {...action,key: pos, marginLeft: Dimensions.getSize(6), onPress: (e, name)=>this.onActionPress(e, name)}, null))
+            {...action,key: pos, marginLeft: 18, onPress: (e, name)=>this.onActionPress(e, name)}, null))
         }
       </View>
     </View>);
@@ -137,14 +136,14 @@ const styles = StyleSheet.create({
   titles:{
     flexDirection:"column",
     justifyContent:"space-around",
-    marginTop: Dimensions.getSize(3),
-    marginBottom:Dimensions.getSize(2),
+    marginTop: 8,
+    marginBottom:6,
     alignItems:"center"
   },
   title:{
     flex:1,
     color:"#1c2429",
-    fontSize:Dimensions.getSize(7),
+    fontSize: 20,
     textAlign:"center"
   },
   actions:{
@@ -158,8 +157,8 @@ const styles = StyleSheet.create({
     flex:0
   },
   actionImg:{
-    width:Dimensions.getSize(6),
-    height:Dimensions.getSize(8)
+    width: 18,
+    height:24
   }
 });
 export default ToolBar;

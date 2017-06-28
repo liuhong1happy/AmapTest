@@ -6,6 +6,9 @@ import Dimensions from '../components/base/react-native-dimensions';
 import { Platform } from '../components/base/react-native-components';
 import HomePage from '../components/home';
 import HomeIndexPage from '../components/home/home-index';
+import HomeCountPage from '../components/home/home-count';
+import HomeNewPage from '../components/home/home-new';
+import HomeDataPage from '../components/home/home-data';
 
 class MainApp extends React.Component {
   constructor(props, context) {
@@ -64,6 +67,9 @@ const RouterApp = () =>
   <Router defaultRoute="/home/index" path="/" component={MainApp}>
     <Route path="home" component={HomePage}>
       <Route path="index" component={HomeIndexPage} />
+      <Route path="count" component={HomeCountPage} />
+      <Route path="new" component={HomeNewPage} />
+      <Route path="data" component={HomeDataPage} />
     </Route>
   </Router>;
 

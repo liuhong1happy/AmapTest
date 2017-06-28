@@ -108,7 +108,10 @@ public class RCTAMapManager extends ViewGroupManager<RCTAMapView>
                     polylineIds.add(i, view.addPolyline(polylineOptions));
                 } else {
                     String pId = polylineIds.get(i);
-                    view.setPolylineOptions(pId, polylineOptions);
+                    String newPId = view.setPolylineOptions(pId, polylineOptions);
+                    if(!newPId.equals(pId)) {
+                        markerIds.set(i, newPId);
+                    }
                 }
             }
             if(polylineIds.size()>count) {
@@ -131,7 +134,10 @@ public class RCTAMapManager extends ViewGroupManager<RCTAMapView>
                     markerIds.add(i, view.addMarker(markerOptions));
                 } else {
                     String pId = markerIds.get(i);
-                    view.setMarkerOptions(pId, markerOptions);
+                    String newPId = view.setMarkerOptions(pId, markerOptions);
+                    if(!newPId.equals(pId)) {
+                        markerIds.set(i, newPId);
+                    }
                 }
             }
             // 移除多余的标记

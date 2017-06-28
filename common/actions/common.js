@@ -27,8 +27,13 @@ export const fetchRedirectAction = function (payload) {
   return { type: types.common.FETCH_REDIRECT, payload };
 };
 
+export const setState = function (state) {
+  return { type: types.common.SET_STATE, state };
+};
+
 export default {
   fetchRedirectAction,
   fetchMsgAction,
-  confirmAction
-}
+  confirmAction,
+  setState
+};
