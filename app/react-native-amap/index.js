@@ -1,7 +1,51 @@
 // AMapView.js
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { requireNativeComponent, View, processColor, ViewPropTypes, Alert, Image } from 'react-native';
+import { requireNativeComponent, View, processColor, ViewPropTypes, Alert, Image, NativeModules } from 'react-native';
+
+var AnimationUtils = {
+  addCallback: (data, callback) => {
+    AnimationUtils.data = data;
+    AnimationUtils.callback = callback;
+  },
+  addListener: (key, callback) => {
+    const index = AnimationUtils.listeners.findIndex(l=>l.key===key);
+    if(index!==-1) {
+      AnimationUtils.listeners[index] = {
+        key,
+        callback
+      };
+    } else {
+      AnimationUtils.listeners.push({
+        key,
+        callback
+      })
+    }
+  },
+  removeListener: (key) => {
+    const index = AnimationUtils.listeners.findIndex(l=>l.key===key);
+    if(index!==-1) AnimationUtils.listeners.splice(index);
+  },
+  data: null,
+  callback: null,
+  listeners: []
+}
+
+var now;
+var then = Date.now();
+const animate = ()=> {
+  window.requestAnimationFrame(animate);
+  if(AnimationUtils.callback && AnimationUtils.data) {
+      AnimationUtils.callback(AnimationUtils.data);
+      AnimationUtils.data = null;
+      AnimationUtils.callback = null;
+  }
+  AnimationUtils.listeners.forEach(({key, callback}) => {
+    callback && callback();
+  })
+}
+animate();
+
 
 var MyLocationStyle = (style = {})=> {
   if(style.fillColor) options.fillColor = processColor(options.fillColor);
@@ -27,12 +71,14 @@ var MarkerOptions = (options = {})=> {
     flat: true,
     draggable: true,
     visible: true,
+    onlyPosition: false,
     position: {
       latitude: 0,
       longitude: 0,
     },
     title: "标记",
     snippet: "标记",
+    period: 1,
     ...options
   }
 }
@@ -129,3 +175,5 @@ module.exports = AMapView;
 module.exports.MyLocationStyle = MyLocationStyle;
 module.exports.MarkerOptions = MarkerOptions;
 module.exports.PolylineOptions = PolylineOptions;
+module.exports.AMapUtils = NativeModules.AMapUtils;
+module.exports.AnimationUtils = AnimationUtils;

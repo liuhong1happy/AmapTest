@@ -29,7 +29,7 @@ class ActionButton extends React.Component {
     const img = this.genImage();
     return (<TouchableOpacity onPress={this.onPress.bind(this)} style={[styles.button, { width:this.props.width, marginLeft:this.props.marginLeft }]}>
       {img}
-      <Text style={{ color: this.props.titleColor || "#1c2429", fontSize: 18 }}>{this.props.title}</Text>
+      <Text style={{ color: this.props.titleColor || "white", fontSize: 18 }}>{this.props.title}</Text>
     </TouchableOpacity>);
   }
 }
@@ -87,13 +87,6 @@ class ToolBar extends React.Component {
       return (<View />);
     }
   }
-  genSubtitle(subtitle) {
-    if (subtitle) {
-      return (<View><Text style={styles.subtitle}>{subtitle}</Text></View>);
-    } else {
-      return (<View />);
-    }
-  }
   render() {
     const title = this.genTitle(this.props.title);
     const actions = this.props.actions || [];
@@ -127,7 +120,7 @@ const styles = StyleSheet.create({
     borderBottomColor:"#ccc",
     borderBottomWidth:0.5,
     borderStyle:"solid",
-    backgroundColor:"white",
+    backgroundColor:"#333",
     height:Dimensions.toolBarHeight,
   },
   item:{
@@ -142,7 +135,7 @@ const styles = StyleSheet.create({
   },
   title:{
     flex:1,
-    color:"#1c2429",
+    color:"white",
     fontSize: 20,
     textAlign:"center"
   },

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Alert, View, Text, StyleSheet, Switch, ScrollView, TimePickerAndroid, Modal, FlatList, TextInput } from 'react-native';
 import { connect } from 'react-redux';
-import AMapView, { MyLocationStyle, MarkerOptions, PolylineOptions } from 'react-native-amap';
+import AMapView, { MyLocationStyle, MarkerOptions, PolylineOptions, AMapUtils } from 'react-native-amap';
 import ToolBar from '../base/react-native-toolbar';
 import { RouteHistory } from '../base/react-native-router';
 import Dimensions from '../base/react-native-dimensions';
@@ -16,15 +16,21 @@ import TimeActions from '../../actions/times';
 const calTime = (a, bTime = Date.now()) => {
     const aTime = new Date(a).valueOf();
     let str = aTime<bTime ? "已过" : "还剩";
-    const abs = Math.abs(aTime - bTime);
-    if(abs< 1000*60) {
-        str += Math.round(abs / 1000)+'秒';
-    } else if(abs < 1000*3600) {
-        str += Math.round(abs / 1000 / 60)+'分';
-    } else if(abs < 1000*3600 * 24) {
-        str += Math.round(abs / 1000 / 3600)+'时';
-    } else {
-         str += Math.round(abs / 1000 / 3600 / 24)+'天';
+    let abs = Math.abs(aTime - bTime);
+    while(abs>=1000) {
+        if(abs< 1000*60) {
+            str += Math.round(abs / 1000)+'秒';
+            abs = abs % 1000;
+        } else if(abs < 1000*3600) {
+            str += Math.round(abs / 1000 / 60)+'分';
+            abs = abs % (1000*60);
+        } else if(abs < 1000*3600 * 24) {
+            str += Math.round(abs / 1000 / 3600)+'时';
+            abs = abs % (1000*3600);
+        } else {
+            str += Math.round(abs / 1000 / 3600 / 24)+'天';
+            abs = abs % (1000*3600*24);
+        }
     }
     return str;
 }
@@ -34,17 +40,27 @@ class HomeNewPage extends Component {
         super(props, context);
         this.state = {
             myLocationStyle: new MyLocationStyle({ showMarker: false, type: MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER }),
-            myLocationMarker: new MarkerOptions()
+            myLocationMarker: new MarkerOptions(),
+            distance: 0
         };
     }
     onCameraChange({ nativeEvent }) {
 
     }
     onMyLocationChange({ nativeEvent : {latitude, longitude} }) {
-      const myLocationMarker = { ...this.state.myLocationMarker, position:  { latitude, longitude }};
-      this.setState({ 
-          myLocationMarker
-      })
+      const myLocationMarker = { ...this.state.myLocationMarker, position:  { latitude, longitude }, onlyPosition: true};
+      if(this.timeMarker && this.timeMarker.position) {
+        AMapUtils.calculateLineDistance([myLocationMarker.position, this.timeMarker.position]).then(distance=>{
+            this.setState({ 
+                myLocationMarker,
+                distance
+            })
+        })
+      } else {
+        this.setState({ 
+            myLocationMarker
+        })
+      }
     }
 
     onSubmitPress(time) {
@@ -64,7 +80,8 @@ class HomeNewPage extends Component {
         const { times, id } = this.props;
         const time = times[parseInt(id)-1];
         const timeMarker = new MarkerOptions({ position: time.position});
-        const { myLocationMarker, myLocationStyle } = this.state;
+        this.timeMarker = timeMarker;
+        const { myLocationMarker, myLocationStyle, distance } = this.state;
         const markers = [];
         if(timeMarker.position) markers.push(timeMarker);
         if(myLocationMarker.position) markers.push(myLocationMarker);
@@ -73,7 +90,7 @@ class HomeNewPage extends Component {
             <View style={styles.flex}>
                 <ToolBar title={time.title + " " + time.time } 
                 actions={[{title: '确定', name: 'ok'}]} onActionPress={()=>this.onSubmitPress(time)}
-                navIcon={{title: "返回"}} onNavIconPress={()=>RouteHistory.popRoute()}/>
+                navIcon={{title: "返回"}} onNavIconPress={()=>RouteHistory.popRoute()} />
                 <AMapView style={styles.map}  markers={markers}
                 myLocationEnabled  onCameraChange={(e)=>this.onCameraChange(e)}
                 showMyLocationButton  onMyLocationChange={(e)=>this.onMyLocationChange(e)} 
@@ -86,7 +103,10 @@ class HomeNewPage extends Component {
                         <Text>{myLocationMarker.position ?  "你当前的位置：经纬"+myLocationMarker.position.latitude.toFixed(6)+","+ myLocationMarker.position.longitude.toFixed(6) : "暂未定位" }</Text>
                     </View>
                     <View>
-                        <Text>{ "距离打开时间"+ calTime(format+" "+ time.time) }</Text>
+                        <Text>{myLocationMarker.position && timeMarker.position ?  "距离打卡位置为：" +  distance.toFixed(2) + "米" : "无法正确计算距离" }</Text>
+                    </View>
+                    <View>
+                        <Text>{ "距离打卡时间"+ calTime(format+" "+ time.time) }</Text>
                     </View>
                 </View>
             </View>
@@ -101,12 +121,12 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#f0f0f0'
+        backgroundColor: '#fff'
     },
     map: {
         position: 'absolute',
         top: Dimensions.toolBarHeight,
-        bottom: 50,
+        bottom: 80,
         left: 0,
         right: 0,
         backgroundColor: '#f0f0f0'

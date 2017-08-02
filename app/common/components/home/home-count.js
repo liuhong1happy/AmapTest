@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import ToolBar from '../base/react-native-toolbar';
 import { RouteHistory } from '../base/react-native-router';
 import { TouchableOpacity } from '../base/react-native-components';
+import TabBars from '../base/tabbars';
 
 class HomeCountPage extends Component {
     renderItem(item) {
@@ -24,12 +25,13 @@ class HomeCountPage extends Component {
         const times = this.props.times;
         return (
             <View style={styles.flex}>
-                <ToolBar title="打卡统计" navIcon={{title: "返回"}} onNavIconPress={()=>RouteHistory.popRoute()}/>
+                <ToolBar title="打卡统计" />
                 <ScrollView style={styles.scrollView}>
                     <View>
                         <Text style={styles.listTitle}>打卡列表</Text>
                         <View style={styles.container}>
                             <FlatList numColumns={3} data={times.concat({ id: 0, title: "新增" })} 
+                                keyExtractor={(item)=>item.id}
                                 renderItem={({item}) => 
                                     (<TouchableOpacity key={item.id} style={[styles.block, item.id===0 ? styles.bGray : {}]} onPress={()=>this.handlePress(item.id)}>
                                     <Text style={styles.blockTitle}>{item.title}</Text>
@@ -37,12 +39,13 @@ class HomeCountPage extends Component {
                         </View>
                     </View>
                     <View>
-                        <Text style={styles.listTitle}>打开统计</Text>
+                        <Text style={styles.listTitle}>打卡统计</Text>
                         <View style={styles.container}>
-                            <FlatList data={times} renderItem={({item}) => this.renderItem(item)} />
+                            <FlatList keyExtractor={(item)=>item.id} data={times} renderItem={({item}) => this.renderItem(item)} />
                         </View>
                     </View>
                 </ScrollView>
+                <TabBars name="/home/count" />
             </View>
         );
     }

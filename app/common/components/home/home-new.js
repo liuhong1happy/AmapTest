@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { Alert, View, Text, StyleSheet, Switch, ScrollView, TimePickerAndroid, Modal, FlatList, TextInput } from 'react-native';
 import { connect } from 'react-redux';
-import AMapView, { MyLocationStyle, MarkerOptions, PolylineOptions } from 'react-native-amap';
+import AMapView, { MyLocationStyle, MarkerOptions, PolylineOptions, AnimationUtils } from 'react-native-amap';
 import ToolBar from '../base/react-native-toolbar';
 import { RouteHistory } from '../base/react-native-router';
 import Dimensions from '../base/react-native-dimensions';
 import { TouchableOpacity } from '../base/react-native-components';
 import TimeTypes, { TimeTypesArray } from '../../constants/TimeTypes';
 import TimeActions from '../../actions/times';
+import TabBars from '../base/tabbars';
 
 class HomeNewPage extends Component {
     constructor(props, context) {
@@ -21,9 +22,11 @@ class HomeNewPage extends Component {
         };
     }
     onCameraChange({ nativeEvent }) {
-      const centerMarker = { ...this.state.centerMarker, position:  nativeEvent.target};
-      this.setState({ 
-          centerMarker
+      const centerMarker = { ...this.state.centerMarker, position:  nativeEvent.target, onlyPosition: true};
+      AnimationUtils.addCallback(centerMarker, (data)=> {
+        this.setState({ 
+            centerMarker: data
+        })
       })
     }
     onMyLocationChange(e) {
@@ -165,6 +168,7 @@ class HomeNewPage extends Component {
                         <TextInput style={styles.textinput} value={fUnhandle} placeholder="请填写标记" underlineColorAndroid="transparent" onChangeText={(value)=>this.onValueChange('unhandle', value)} />
                     </View>
                 </ScrollView>
+                <TabBars name="/home/new" />
             </View>
         );
     }
